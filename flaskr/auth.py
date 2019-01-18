@@ -10,11 +10,33 @@ from flaskr.db import get_db
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
+def login_required(view):
+	@functools.wraps(view)
+	def wrapped_view(**kwargs):
+		if g.user is None:
+			return redirect(user_for('auth.login'))
+
+		return view(**kwargs)
+
+	return wrapped_view
+
+@bp.before_app_request
+def load_logged_in_user():
+	user_id = session.get('user_id')
+
+	# # g is a special object that is unique for each request. It is used to store data that might be accessed by multiple functions during the request.
+	if user_id is None:
+		g.user = None
+	else:
+		g.user = get_db.execute(
+			'SELECT * FROM user WHERE id = ?', (user_id,)
+		).fetchone()
+
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
 	if request.method == 'POST':
-		username = request.form('username')
-		password = request.form('password')
+		username = request.form['username']
+		password = request.form['password']
 
 		db = get_db()
 		error = None
@@ -41,7 +63,6 @@ def register():
 
 	return render_template('auth/register.html')
 
-
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
 	if request.method == 'POST':
@@ -67,19 +88,6 @@ def login():
 
 	return render_template('auth/login.html')
 
-
-@bp.before_app_request
-def load_logged_in_user():
-	user_id = session.get('user_id')
-
-	# # g is a special object that is unique for each request. It is used to store data that might be accessed by multiple functions during the request.
-	if user_id is None:
-		g.user = None
-	else:
-		g.user = get_db.execute(
-			'SELECT * FROM user WHERE id = ?', (user_id,)
-		).fetchone()
-
 @bp.route('/logout')
 def logout():
 	session.clear()
@@ -87,12 +95,4 @@ def logout():
 
 
 
-def login_required(view):
-	@functools.wraps(view)
-	def wrapped_view(**kwargs):
-		if g.user is None:
-			return redirect(user_for('auth.login'))
 
-		return view(**kwargs)
-
-	return wrapped_view

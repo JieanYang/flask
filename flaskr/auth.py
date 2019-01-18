@@ -84,6 +84,7 @@ def login():
 			session.clear()
 			session['user_id'] = user['id']
 			return redirect(url_for('index'))
+			# return redirect(url_for('post.index'))
 
 		flash(error)
 

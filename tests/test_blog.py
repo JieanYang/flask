@@ -61,7 +61,7 @@ def test_create(client, auth, app):
 		assert count == 2
 
 
-def test_update(client, auth, path):
+def test_update(client, auth, app):
 	auth.login()
 	assert client.get('/1/update').status_code == 200
 	client.post('/1/update', data={'title': 'updated', 'body': ''})

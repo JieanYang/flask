@@ -11,7 +11,7 @@ def test_register(client, app):
 		'/auth/register', data={'username': 'a', 'password': 'a'}
 	)
 
-	# data contains the body of the response as bytes. If you expect a certain value to render on the page, check that it’s in data. Bytes must be compared to bytes. If you want to compare Unicode text, use get_data(as_text=True) instead.
+	
 
 	# Check url
 	assert 'http://localhost/auth/login' == response.headers['Location']
@@ -23,7 +23,7 @@ def test_register(client, app):
 
 # pytest.mark.parametrize tells Pytest to run the same test function with different arguments.
 @pytest.mark.parametrize(('username', 'password', 'message'), (
-	('', '', b'Username is requried.'), 
+	('', '', b'Username is required.'), 
 	('a', '', b'Password is required.'), 
 	('test', 'test', b'already registered'), 
 ))
@@ -32,19 +32,19 @@ def test_register_validate_input(client, username, password, message):
 		'/auth/register', 
 		data={'username': username, 'password': password}
 	)
-	assert messsage in response.data
+	assert message in response.data
 
 
 # login
 def test_login(client, auth):
-	assert client.get('/auth/login').status_code = 200
+	assert client.get('/auth/login').status_code == 200
 	response = auth.login()
 	assert response.headers['Location'] == 'http://localhost/'
 
 	# Using client in a with block allows accessing context variables such as session after the response is returned.
 	with client:
 		client.get('/')
-		assert session['user_id'] = 1
+		assert session['user_id'] == 1
 		assert g.user['username'] == 'test'
 
 @pytest.mark.parametrize(('username', 'password', 'message'), (
